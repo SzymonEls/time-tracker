@@ -30,11 +30,16 @@ run: app
 	@killall $(APP_NAME) 2>/dev/null || true
 	open $(APP)
 
-## Put it in /Applications, where Login Items can find it.
+## Put it in /Applications, where Login Items can find it, and restart it from
+## there. Quitting first is not politeness: replacing the bundle under a running
+## copy leaves that copy running the old code, so an "update" would appear to do
+## nothing until the next reboot.
 install: app
+	@killall $(APP_NAME) 2>/dev/null || true
 	rm -rf /Applications/$(APP_NAME).app
 	cp -R $(APP) /Applications/
-	@echo "Installed to /Applications/$(APP_NAME).app"
+	open /Applications/$(APP_NAME).app
+	@echo "Installed to /Applications/$(APP_NAME).app and relaunched"
 
 uninstall:
 	@killall $(APP_NAME) 2>/dev/null || true
