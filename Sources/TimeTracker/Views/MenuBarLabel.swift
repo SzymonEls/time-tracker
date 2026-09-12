@@ -7,7 +7,10 @@ struct MenuBarLabel: View {
     @Environment(TimerStore.self) private var store
 
     var body: some View {
-        HStack(spacing: 4) {
+        // 6 rather than the 4 a square glyph would want: a diamond is at its
+        // widest across the middle and tapers away from the text, so the gap
+        // reads as smaller than it measures.
+        HStack(spacing: 6) {
             if let active = store.active {
                 Image(nsImage: BrandMark.running)
                 Text(title(for: active))
