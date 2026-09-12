@@ -13,30 +13,32 @@ enum BrandMark {
 
     private static func diamond(filled: Bool) -> NSImage {
         let side: CGFloat = 15
-        let image = NSImage(size: NSSize(width: side, height: side))
-        image.lockFocus()
+        // The drawing-handler initialiser, not lockFocus(): this one re-runs
+        // the drawing at whatever resolution it is asked for, so the mark stays
+        // sharp on a Retina bar. lockFocus() rasterises once, at one scale, and
+        // everything after that is an enlargement of those pixels.
+        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+            let inset: CGFloat = filled ? 1.5 : 2
+            let centre = CGPoint(x: rect.midX, y: rect.midY)
+            let reach = rect.width / 2 - inset
 
-        let inset: CGFloat = filled ? 1.5 : 2
-        let centre = CGPoint(x: side / 2, y: side / 2)
-        let reach = side / 2 - inset
+            let path = NSBezierPath()
+            path.move(to: NSPoint(x: centre.x, y: centre.y + reach))
+            path.line(to: NSPoint(x: centre.x + reach, y: centre.y))
+            path.line(to: NSPoint(x: centre.x, y: centre.y - reach))
+            path.line(to: NSPoint(x: centre.x - reach, y: centre.y))
+            path.close()
 
-        let path = NSBezierPath()
-        path.move(to: NSPoint(x: centre.x, y: centre.y + reach))
-        path.line(to: NSPoint(x: centre.x + reach, y: centre.y))
-        path.line(to: NSPoint(x: centre.x, y: centre.y - reach))
-        path.line(to: NSPoint(x: centre.x - reach, y: centre.y))
-        path.close()
-
-        NSColor.black.set()
-        if filled {
-            path.fill()
-        } else {
-            path.lineWidth = 1.6
-            path.lineJoinStyle = .round
-            path.stroke()
+            NSColor.black.set()
+            if filled {
+                path.fill()
+            } else {
+                path.lineWidth = 1.6
+                path.lineJoinStyle = .round
+                path.stroke()
+            }
+            return true
         }
-
-        image.unlockFocus()
         image.isTemplate = true
         return image
     }

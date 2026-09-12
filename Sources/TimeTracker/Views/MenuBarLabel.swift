@@ -12,16 +12,28 @@ struct MenuBarLabel: View {
         // reads as smaller than it measures.
         HStack(spacing: 6) {
             if let active = store.active {
-                Image(nsImage: BrandMark.running)
+                mark(BrandMark.running)
                 Text(title(for: active))
             } else {
-                Image(nsImage: BrandMark.idle)
+                mark(BrandMark.idle)
                 // Saying so beats a bare icon: an idle diamond and a diamond
                 // whose project happens to be off screen look the same, and
                 // only one of them means nothing is being tracked.
                 Text("No project")
             }
         }
+    }
+
+    /// Drops the mark by 0.8pt so it sits where the eye expects it.
+    ///
+    /// Centring the image's box against the text's box puts the diamond 0.4pt
+    /// above the centre of the capitals and 1.35pt above the centre of the
+    /// whole line - measured, not guessed. Neither is where it belongs: the
+    /// eye reads the centre of the ink, and words like "No project" carry
+    /// theirs low, on the descenders. This lands between the two.
+    private func mark(_ image: NSImage) -> some View {
+        Image(nsImage: image)
+            .alignmentGuide(VerticalAlignment.center) { $0[VerticalAlignment.center] - 0.8 }
     }
 
     private func title(for active: ActiveEntry) -> String {
