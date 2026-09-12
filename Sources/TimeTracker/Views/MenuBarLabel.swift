@@ -7,13 +7,17 @@ struct MenuBarLabel: View {
     @Environment(TimerStore.self) private var store
 
     var body: some View {
-        if let active = store.active {
-            HStack(spacing: 4) {
+        HStack(spacing: 4) {
+            if let active = store.active {
                 Image(nsImage: BrandMark.running)
                 Text(title(for: active))
+            } else {
+                Image(nsImage: BrandMark.idle)
+                // Saying so beats a bare icon: an idle diamond and a diamond
+                // whose project happens to be off screen look the same, and
+                // only one of them means nothing is being tracked.
+                Text("No project")
             }
-        } else {
-            Image(nsImage: BrandMark.idle)
         }
     }
 
