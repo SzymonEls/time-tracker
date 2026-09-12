@@ -3,13 +3,20 @@ import SwiftUI
 /// One of the day's blocks, as a single tap target: clicking it starts that
 /// project, or stops it when it is the one already running. There is no second
 /// Stop button anywhere - the row you are on is the row you press.
+///
+/// The look is the web app's slot card: a coloured bar down the left edge, the
+/// same colour washed faintly behind it, and the same meanings attached to the
+/// colours - so a glance here and a glance at the home page agree.
 struct SlotRow: View {
     let slot: Slot
     let trackedSeconds: Int
     let isPending: Bool
     let action: () -> Void
 
+    @State private var isHovering = false
+
     private var isRunning: Bool { slot.isRunning }
+    private var accent: Color { slot.accent }
 
     var body: some View {
         if let project = slot.project {
@@ -18,6 +25,7 @@ struct SlotRow: View {
             }
             .buttonStyle(.plain)
             .disabled(isPending)
+            .onHover { isHovering = $0 }
         } else {
             emptySlot
         }
@@ -35,7 +43,7 @@ struct SlotRow: View {
 
                 Text(project.focus.isEmpty ? project.shortGoal : project.focus)
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.mutedForeground)
                     .lineLimit(1)
             }
 
@@ -45,40 +53,51 @@ struct SlotRow: View {
                 Text(Duration.clock(trackedSeconds))
                     .font(.system(size: 12, weight: isRunning ? .semibold : .regular, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(isRunning ? Color.accentColor : .secondary)
+                    .foregroundStyle(isRunning ? accent : Color.mutedForeground)
 
                 glyph
             }
         }
         .padding(.vertical, 9)
-        .padding(.horizontal, 10)
+        .padding(.leading, 12)
+        .padding(.trailing, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 9)
-                .fill(isRunning ? Color.accentColor.opacity(0.13) : Color.primary.opacity(0.045))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 9)
-                .strokeBorder(isRunning ? Color.accentColor.opacity(0.45) : .clear, lineWidth: 1)
-        )
+        .background(background)
         .opacity(isPending ? 0.55 : 1)
         .contentShape(Rectangle())
+    }
+
+    private var background: some View {
+        ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(accent.opacity(isRunning ? 0.16 : (isHovering ? 0.13 : 0.08)))
+
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(accent.opacity(isRunning ? 0.55 : 0.22), lineWidth: 1)
+
+            // The left bar, clipped back to the card's own corners so it hugs
+            // the rounding instead of poking out of it.
+            Rectangle()
+                .fill(accent)
+                .frame(width: 3)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
     }
 
     private var badge: some View {
         ZStack {
             Circle()
-                .fill(isRunning ? Color.accentColor : Color.primary.opacity(0.1))
+                .fill(isRunning ? accent : accent.opacity(0.16))
                 .frame(width: 22, height: 22)
 
             if slot.isDone && !isRunning {
                 Image(systemName: "checkmark")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(accent)
             } else {
                 Text(slot.slot)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(isRunning ? Color.white : .secondary)
+                    .foregroundStyle(isRunning ? Color.white : accent)
             }
         }
         .padding(.top, 1)
@@ -92,7 +111,7 @@ struct SlotRow: View {
         } else {
             Image(systemName: isRunning ? "stop.fill" : "play.fill")
                 .font(.system(size: 9))
-                .foregroundStyle(isRunning ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.tertiary))
+                .foregroundStyle(isRunning ? accent : accent.opacity(0.55))
         }
     }
 
@@ -100,17 +119,29 @@ struct SlotRow: View {
         HStack(spacing: 10) {
             Text(slot.slot)
                 .font(.system(size: 11, weight: .bold, design: .rounded))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color.mutedForeground.opacity(0.7))
                 .frame(width: 22, height: 22)
-                .background(Circle().strokeBorder(Color.primary.opacity(0.15), style: StrokeStyle(lineWidth: 1, dash: [3, 2])))
+                .background(
+                    Circle().strokeBorder(
+                        Color.mutedForeground.opacity(0.35),
+                        style: StrokeStyle(lineWidth: 1, dash: [3, 2])
+                    )
+                )
 
             Text("Nothing booked")
                 .font(.system(size: 12))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color.mutedForeground.opacity(0.8))
 
             Spacer()
         }
         .padding(.vertical, 9)
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(
+                    Color.cardBorder,
+                    style: StrokeStyle(lineWidth: 1, dash: [4, 3])
+                )
+        )
     }
 }

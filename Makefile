@@ -4,7 +4,7 @@ CONFIG     ?= release
 BIN        := .build/$(CONFIG)/$(APP_NAME)
 APP        := build/$(APP_NAME).app
 
-.PHONY: all build app run install uninstall clean
+.PHONY: all build app run install uninstall icon clean
 
 all: app
 
@@ -18,6 +18,7 @@ app: build
 	mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Resources
 	cp $(BIN) $(APP)/Contents/MacOS/$(APP_NAME)
 	cp Resources/Info.plist $(APP)/Contents/Info.plist
+	cp Resources/AppIcon.icns $(APP)/Contents/Resources/AppIcon.icns
 # Ad-hoc signature (-s -). Free, local-only, and enough for macOS to keep the
 # app's identity stable between rebuilds - which is what permissions are
 # remembered against. Distribution needs a Developer ID instead.
@@ -38,6 +39,14 @@ install: app
 uninstall:
 	@killall $(APP_NAME) 2>/dev/null || true
 	rm -rf /Applications/$(APP_NAME).app
+
+## Redraw the app icon from Tools/make-icon.swift. Only needed when the brand
+## changes - the .icns it produces is committed.
+icon:
+	swiftc -O Tools/make-icon.swift -o /tmp/make-icon
+	/tmp/make-icon Resources/AppIcon.iconset
+	iconutil -c icns Resources/AppIcon.iconset -o Resources/AppIcon.icns
+	rm -rf Resources/AppIcon.iconset /tmp/make-icon
 
 clean:
 	swift package clean

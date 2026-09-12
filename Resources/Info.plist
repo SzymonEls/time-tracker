@@ -8,6 +8,8 @@
 	<string>TimeTracker</string>
 	<key>CFBundleExecutable</key>
 	<string>TimeTracker</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.szymonels.timetracker</string>
 	<key>CFBundlePackageType</key>

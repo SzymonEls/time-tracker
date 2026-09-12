@@ -1,18 +1,19 @@
 import SwiftUI
 
-/// What sits in the menu bar. It stays deliberately narrow: a dot, a project
-/// and a rounded time when something runs, and a bare icon when nothing does.
+/// What sits in the menu bar: the brand diamond, and - while a timer runs - the
+/// project and how long it has been going. It stays deliberately narrow, since
+/// every pixel here is taken from the app next door.
 struct MenuBarLabel: View {
     @Environment(TimerStore.self) private var store
 
     var body: some View {
         if let active = store.active {
             HStack(spacing: 4) {
-                Image(systemName: "record.circle")
+                Image(nsImage: BrandMark.running)
                 Text(title(for: active))
             }
         } else {
-            Image(systemName: "timer")
+            Image(nsImage: BrandMark.idle)
         }
     }
 

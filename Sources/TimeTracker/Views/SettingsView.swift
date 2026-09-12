@@ -23,7 +23,7 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
                 Text("The address you open the productivity app at.")
                     .font(.system(size: 10))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.mutedForeground)
             }
 
             VStack(alignment: .leading, spacing: 5) {
@@ -33,12 +33,13 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
                 Text("Account page → API token → Copy.")
                     .font(.system(size: 10))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.mutedForeground)
             }
 
             HStack(spacing: 8) {
                 Button("Test connection") { Task { await test() } }
                     .disabled(isChecking || address.isEmpty || token.isEmpty)
+                    .tint(.brand)
 
                 if isChecking {
                     ProgressView().controlSize(.small)
@@ -49,11 +50,11 @@ struct SettingsView: View {
                     case .success(let username):
                         Label("Signed in as \(username)", systemImage: "checkmark.circle.fill")
                             .font(.system(size: 11))
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color.slotDone)
                     case .failure(let message):
                         Label(message, systemImage: "xmark.circle.fill")
                             .font(.system(size: 11))
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.danger)
                             .lineLimit(2)
                     }
                 }
@@ -67,6 +68,7 @@ struct SettingsView: View {
                 Spacer()
                 Button("Save") { save() }
                     .keyboardShortcut(.defaultAction)
+                    .tint(.brand)
             }
         }
         .padding(18)

@@ -40,13 +40,16 @@ struct TodayPanel: View {
     // MARK: - Sections
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .top, spacing: 8) {
+            BrandDiamond()
+                .padding(.top, 3)
+
             VStack(alignment: .leading, spacing: 1) {
                 Text("Today")
                     .font(.system(size: 14, weight: .semibold))
                 Text(headerDate)
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.mutedForeground)
             }
 
             Spacer()
@@ -55,9 +58,10 @@ struct TodayPanel: View {
                 Text(Duration.clock(store.dayTotalSeconds))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
+                    .foregroundStyle(store.active == nil ? Color.primary : Color.brand)
                 Text("tracked")
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.mutedForeground)
             }
         }
         .padding(.horizontal, 12)
@@ -85,11 +89,12 @@ struct TodayPanel: View {
                 .font(.system(size: 13, weight: .semibold))
             Text("Point the app at your productivity instance and paste the API token from its account page.")
                 .font(.system(size: 11))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.mutedForeground)
                 .fixedSize(horizontal: false, vertical: true)
 
             Button("Open Settings", action: showSettings)
                 .controlSize(.small)
+                .tint(.brand)
                 .padding(.top, 2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -100,7 +105,7 @@ struct TodayPanel: View {
             ProgressView().controlSize(.small)
             Text("Loading today…")
                 .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.mutedForeground)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 14)
@@ -110,12 +115,12 @@ struct TodayPanel: View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 10))
-                .foregroundStyle(.orange)
+                .foregroundStyle(Color.warning)
                 .padding(.top, 1)
 
             Text(message)
                 .font(.system(size: 11))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.mutedForeground)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 12)
@@ -131,7 +136,7 @@ struct TodayPanel: View {
 
             Spacer()
 
-            FooterButton(icon: "power", help: "Quit TimeTracker") {
+            FooterButton(icon: "power", help: "Quit TimeTracker", tint: .danger) {
                 NSApplication.shared.terminate(nil)
             }
         }
@@ -167,6 +172,7 @@ struct TodayPanel: View {
 private struct FooterButton: View {
     let icon: String
     let help: String
+    var tint: Color = .brand
     let action: () -> Void
 
     @State private var isHovering = false
@@ -175,11 +181,11 @@ private struct FooterButton: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(isHovering ? tint : Color.mutedForeground)
                 .frame(width: 26, height: 22)
                 .background(
                     RoundedRectangle(cornerRadius: 5)
-                        .fill(isHovering ? Color.primary.opacity(0.08) : .clear)
+                        .fill(isHovering ? tint.opacity(0.12) : .clear)
                 )
         }
         .buttonStyle(.plain)
