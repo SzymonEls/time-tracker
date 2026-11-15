@@ -9,6 +9,13 @@ struct Today: Decodable, Sendable {
     let active: ActiveEntry?
     let dayTotalSeconds: Int
     let dayTotalLabel: String
+    /// Keyed by project id. Optional so the app still loads against a server
+    /// that predates the field.
+    let unbookedTrackedSeconds: [String: Int]?
+
+    func trackedUnbooked(projectID: Int) -> Int? {
+        unbookedTrackedSeconds?[String(projectID)]
+    }
 }
 
 /// One of the day's A/B/C blocks. A block with no project booked still comes
