@@ -133,6 +133,7 @@ struct TodayPanel: View {
                 Task { await store.refresh() }
             }
             FooterButton(icon: "gearshape", help: "Settings", action: showSettings)
+            FooterButton(icon: "safari", help: "Open in browser", action: openWebApp)
 
             Spacer()
 
@@ -153,6 +154,11 @@ struct TodayPanel: View {
         } else {
             await store.start(projectID: project.id)
         }
+    }
+
+    private func openWebApp() {
+        guard case .success(let client) = settings.makeClient() else { return }
+        NSWorkspace.shared.open(client.baseURL)
     }
 
     private func showSettings() {
