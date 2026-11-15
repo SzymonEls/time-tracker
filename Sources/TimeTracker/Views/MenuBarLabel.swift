@@ -15,11 +15,10 @@ struct MenuBarLabel: View {
                 mark(BrandMark.running)
                 Text(title(for: active))
             } else {
+                // The idle mark alone: other menu bar items collapse to an icon
+                // when there is nothing to say, and the idle diamond already
+                // differs from the running one.
                 mark(BrandMark.idle)
-                // Saying so beats a bare icon: an idle diamond and a diamond
-                // whose project happens to be off screen look the same, and
-                // only one of them means nothing is being tracked.
-                Text("No project")
             }
         }
     }
