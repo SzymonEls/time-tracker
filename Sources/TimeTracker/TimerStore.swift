@@ -22,6 +22,11 @@ final class TimerStore {
     /// measured against this rather than against the server's count, which is
     /// already stale by the time it arrives.
     private(set) var now = Date()
+    /// A stopped session on a project not booked today. Without it the row
+    /// would vanish the moment it is stopped, leaving no way to resume after a
+    /// break short of opening the web app.
+    private(set) var recentUnbooked: (project: Project, stoppedAt: Date)?
+    static let resumeWindow: TimeInterval = 30 * 60
 
     private let settings: AppSettings
     private var clock: Task<Void, Never>?
@@ -118,8 +123,16 @@ final class TimerStore {
     /// empty window.
     private func perform(_ call: () async throws -> Today) async {
         do {
+            let previous = active
             today = try await call()
             now = Date()
+            if let previous, let projectID = previous.projectId, active?.entryId != previous.entryId,
+               !(today?.slots.contains { $0.project?.id == projectID } ?? false) {
+                recentUnbooked = (
+                    Project(id: projectID, title: previous.projectTitle, shortGoal: "Not booked today", focus: previous.description),
+                    now
+                )
+            }
             phase = .ready
             log.debug("Loaded today: \(self.today?.slots.count ?? 0) slots, running: \(self.active?.projectTitle ?? "nothing")")
         } catch let error as APIError {

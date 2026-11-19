@@ -80,7 +80,61 @@ struct TodayPanel: View {
                     Task { await toggle(slot) }
                 }
             }
+
+            // Stopping happens on the running row, so a session on a project not
+            // booked today - one carried past midnight, or started in the web
+            // app - would otherwise have no way to be stopped from here.
+            if let unbooked = unbookedRunningSlot {
+                SlotRow(
+                    slot: unbooked,
+                    trackedSeconds: store.tracked(in: unbooked),
+                    isPending: store.pendingProjectID == unbooked.project?.id
+                ) {
+                    Task { await toggle(unbooked) }
+                }
+            }
+
+            if let recent = recentUnbookedSlot {
+                SlotRow(
+                    slot: recent,
+                    trackedSeconds: recent.trackedSeconds,
+                    isPending: store.pendingProjectID == recent.project?.id
+                ) {
+                    Task { await toggle(recent) }
+                }
+            }
         }
+    }
+
+    private var recentUnbookedSlot: Slot? {
+        guard let recent = store.recentUnbooked, recent.project.id != store.active?.projectId,
+              Date().timeIntervalSince(recent.stoppedAt) < TimerStore.resumeWindow else { return nil }
+        return Slot(
+            slot: "",
+            isDone: false,
+            trackedSeconds: store.today?.trackedUnbooked(projectID: recent.project.id) ?? 0,
+            trackedLabel: "",
+            isRunning: false,
+            project: recent.project
+        )
+    }
+
+    private var unbookedRunningSlot: Slot? {
+        guard let active = store.active, let today = store.today,
+              !today.slots.contains(where: \.isRunning) else { return nil }
+        return Slot(
+            slot: "",
+            isDone: false,
+            trackedSeconds: active.projectId.flatMap { today.trackedUnbooked(projectID: $0) } ?? active.elapsedSeconds,
+            trackedLabel: "",
+            isRunning: true,
+            project: Project(
+                id: active.projectId ?? 0,
+                title: active.projectTitle,
+                shortGoal: "Not booked today",
+                focus: active.description
+            )
+        )
     }
 
     private var setupPrompt: some View {
